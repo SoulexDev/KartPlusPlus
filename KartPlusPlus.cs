@@ -1,11 +1,25 @@
-﻿using KartPlusPlus.Renderer;
+﻿using KartPlusPlus.Engine;
+using KartPlusPlus.Renderer;
+using KartPlusPlus.Physics;
+using KartPlusPlus.UserInput;
+using System.Diagnostics;
 using static SDL3.SDL;
+using KartPlusPlus.Game;
+using KartPlusPlus.AssetManagement;
+using KartPlusPlus.Utility;
+using OpenTK.Mathematics;
 
 namespace KartPlusPlus {
     public class KartPlusPlus {
         //needed to access assets
         public static string AssetsPath;
         public static string RawPath;
+
+        public static List<EngineObject> EngineObjects = new List<EngineObject>();
+
+        //stuff for physics updates
+        private static Stopwatch fixedStepTimer;
+        private static long timerOffset;
 
         //Initialize the program
         public static void Main(string[] args) {
@@ -27,10 +41,54 @@ namespace KartPlusPlus {
             if (!RenderPipeline.Init()) {
                 return SDL_AppResult.SDL_APP_FAILURE;
             }
+            Input.Init();
+            DefaultResources.Load();
+
+            fixedStepTimer = new Stopwatch();
+            fixedStepTimer.Start();
+
+            EngineObject obj = EngineObjectFactory.Instantiate("Free Camera");
+            obj.AddComponent<FreeCam>("FreeCam");
+
+            ResourceLoader.LoadResource(out EngineObject trackModel, "Models/TestTrack.fbx");
+
+            ResourceLoader.LoadResource(out Texture2D protoLight, "Textures/Prototype_Light.png");
+            EngineObject kart = EngineObjectFactory.Instantiate("Kart");
+            kart.AddComponent<ModelRenderer>("model renderer").SetModel(CubeMesh.Generate(protoLight));
+            kart.Transform.Position = Vector3.UnitZ * 10;
+
+            //EngineObject track = EngineObjectFactory.Instantiate("Track");
+            //track.AddComponent<ModelRenderer>("model renderer").SetModel(trackModel);
+
             return SDL_AppResult.SDL_APP_CONTINUE;
         }
         private static SDL_AppResult SDL_AppIterate(nint appState) {
+            Time.Update();
+            Input.GrabState();
+
+            foreach (var obj in EngineObjects) {
+                obj.components.ForEach(c => c.Update());
+            }
+            foreach (var obj in EngineObjects) {
+                obj.components.ForEach(c => c.LateUpdate());
+            }
+
+            if (fixedStepTimer.ElapsedMilliseconds + timerOffset > PhysicsSim.MillisecondsPerTick) {
+                timerOffset = fixedStepTimer.ElapsedMilliseconds + timerOffset - PhysicsSim.MillisecondsPerTick;
+                fixedStepTimer.Restart();
+
+                Time.FixedUpdate();
+
+                foreach (var obj in EngineObjects) {
+                    obj.components.ForEach(c => c.PhysicsTick());
+                }
+
+                //PhysicsSim.Tick();
+            }
+
             RenderPipeline.Render();
+
+            Input.StoreState();
             return SDL_AppResult.SDL_APP_CONTINUE;
         }
         private unsafe static SDL_AppResult SDL_AppEvent(nint appstate, SDL_Event* sdlEvent) {

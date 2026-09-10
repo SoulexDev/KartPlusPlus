@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <Nullable>disable</Nullable>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 
@@ -22,7 +22,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Engine\Physics\" />
+    <Folder Include="Assets\Shaders\" />
+  </ItemGroup>
+
+  <ItemGroup>
+  	<Content Include="Assets\**">
+  		<Pack>true</Pack>
+  		<PackageCopyToOutput>true</PackageCopyToOutput>
+  		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  	</Content>
   </ItemGroup>
 
 </Project>
