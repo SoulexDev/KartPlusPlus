@@ -10,8 +10,8 @@ namespace KartPlusPlus.Engine {
 
         public static void Load() {
             ResourceLoader.LoadResource(out OpaqueShader, 
-                ("shaders/simple_unlit", ShaderType.VertexShader),
-                ("shaders/simple_unlit", ShaderType.FragmentShader));
+                ("shaders/simple_lit", ShaderType.VertexShader),
+                ("shaders/simple_lit", ShaderType.FragmentShader));
 
             OpaqueMaterial = new Material(OpaqueShader);
             //ResourceLoader.LoadResource(out TransparentShader,

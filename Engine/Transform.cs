@@ -1,4 +1,5 @@
-﻿using OpenTK.Mathematics;
+﻿using BepuPhysics;
+using OpenTK.Mathematics;
 
 namespace KartPlusPlus.Engine {
     public class Transform : Component {
@@ -9,6 +10,7 @@ namespace KartPlusPlus.Engine {
 
         //public EngineObject EngineObject;
         private bool isDirty = true;
+        public event Action OnChanged;
 
         public Vector3 LocalPosition = Vector3.Zero;
         public Quaternion LocalRotation = Quaternion.Identity;
@@ -127,6 +129,8 @@ namespace KartPlusPlus.Engine {
         internal void SetDirty() {
             isDirty = true;
             Children.ForEach(c => c.SetDirty());
+
+            OnChanged?.Invoke();
         }
         public void SetParent(Transform transform, bool keepWorld = false) {
             if (transform == this) {
@@ -192,6 +196,12 @@ namespace KartPlusPlus.Engine {
             point /= LocalScale;
 
             return point;
+        }
+        public void Rotate(Vector3 axis, float angle) {
+            Rotation *= Quaternion.FromAxisAngle(axis, angle * (MathF.PI / 180.0f));
+        }
+        public static implicit operator RigidPose(Transform transform) {
+            return new RigidPose((System.Numerics.Vector3)transform.Position, (System.Numerics.Quaternion)transform.Rotation);
         }
     }
 }
