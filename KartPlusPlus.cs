@@ -2,13 +2,15 @@
 using KartPlusPlus.Renderer;
 using KartPlusPlus.Physics;
 using KartPlusPlus.UserInput;
-using System.Diagnostics;
-using static SDL3.SDL;
 using KartPlusPlus.Game;
 using KartPlusPlus.AssetManagement;
 using KartPlusPlus.Utility;
+using System.Diagnostics;
+using static SDL3.SDL;
 using OpenTK.Mathematics;
 
+//material data files
+//- stores shader paths and texture paths for easy loading
 namespace KartPlusPlus {
     public class KartPlusPlus {
         //needed to access assets
@@ -47,15 +49,7 @@ namespace KartPlusPlus {
             fixedStepTimer = new Stopwatch();
             fixedStepTimer.Start();
 
-            EngineObject obj = EngineObjectFactory.Instantiate("Free Camera");
-            obj.AddComponent<FreeCam>("FreeCam");
-
-            ResourceLoader.LoadResource(out EngineObject trackModel, "Models/TestTrack.fbx");
-
-            ResourceLoader.LoadResource(out Texture2D protoLight, "Textures/Prototype_Light.png");
-            EngineObject kart = EngineObjectFactory.Instantiate("Kart");
-            kart.AddComponent<ModelRenderer>("model renderer").SetModel(CubeMesh.Generate(protoLight));
-            kart.Transform.Position = Vector3.UnitZ * 10;
+            TestTrack.Create();
 
             //EngineObject track = EngineObjectFactory.Instantiate("Track");
             //track.AddComponent<ModelRenderer>("model renderer").SetModel(trackModel);
