@@ -9,6 +9,7 @@ namespace KartPlusPlus.Physics {
             base.Init();
         }
         public void SetMesh(Mesh mesh) {
+            //VertexAttribute.GetTotalSizeInBytes(mesh.Attributes);
             collidable = new BepuPhysics.Collidables.Mesh();
         }
         internal override BodyInertia GetBodyIntertia(float mass) {

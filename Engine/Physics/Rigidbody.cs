@@ -7,6 +7,7 @@ namespace KartPlusPlus.Physics {
     public class Rigidbody : Component {
         internal BodyHandle bodyID { get; private set; }
         internal BodyInertia bodyIntertia { get; private set; }
+        internal BodyReference bodyReference { get; private set; }
 
         public Vector3 LinearVelocity {
             get {
@@ -37,15 +38,32 @@ namespace KartPlusPlus.Physics {
                     PhysicsSim.simulation.Bodies[bodyID].SetLocalInertia(bodyIntertia);
             }
         }
+        public float Mass = 1;
+        public float SleepThreshold = 0.001f;
+        private bool useGravity;
+        public bool UseGravity {
+            get {
+                return useGravity;
+            }
+            set {
+                if (useGravity != value) {
+                    useGravity = value;
+
+                    PhysicsSim.ChangeGravityState(bodyID, useGravity);
+                }
+            }
+        }
         public override void Init() {
+            UseGravity = true;
+
             List<Component> colliders = EngineObject.GetComponentsOfType<Collider>();
 
             BodyDescription bodyDescription;
-            BodyActivityDescription bodyActivityDescription = new BodyActivityDescription(0.001f);
+            BodyActivityDescription bodyActivityDescription = new BodyActivityDescription(SleepThreshold);
 
             if (colliders.Count > 0) {
                 Collider collider = (colliders[0] as Collider);
-                bodyIntertia = collider.GetBodyIntertia(1);
+                bodyIntertia = collider.GetBodyIntertia(Mass);
                 //TODO: make this an option later
                 //ContinuousDetection continuousDetection = ContinuousDetection.Continuous();
 
@@ -59,6 +77,7 @@ namespace KartPlusPlus.Physics {
             }
 
             bodyID = PhysicsSim.simulation.Bodies.Add(bodyDescription);
+            bodyReference = PhysicsSim.simulation.Bodies[bodyID];
         }
         public override void OnComponentAdded(Component component) {
 

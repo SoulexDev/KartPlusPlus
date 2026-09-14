@@ -6,6 +6,9 @@ namespace KartPlusPlus.Renderer {
         public uint VBO;
         public uint EBO;
         public int Count;
+        public float[] Vertices;
+        public int[] Indices;
+        public VertexAttribute[] Attributes;
         public PrimitiveType PrimitiveType;
         public BufferUsageHint DrawType;
 
@@ -45,6 +48,9 @@ namespace KartPlusPlus.Renderer {
                 return this;
             }
 
+            Vertices = vertices;
+            Attributes = attributes;
+
             usingIndices = false;
 
             if (!generatedBuffers) {
@@ -78,6 +84,10 @@ namespace KartPlusPlus.Renderer {
                 Console.WriteLine("Attempted to create mesh with no data. This is not allowed.");
                 return this;
             }
+
+            Vertices = vertices;
+            Indices = indices;
+            Attributes = attributes;
 
             usingIndices = true;
 

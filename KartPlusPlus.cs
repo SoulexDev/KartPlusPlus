@@ -2,12 +2,13 @@
 using KartPlusPlus.Renderer;
 using KartPlusPlus.Physics;
 using KartPlusPlus.UserInput;
-using System.Diagnostics;
-using static SDL3.SDL;
 using KartPlusPlus.Game;
 using KartPlusPlus.AssetManagement;
 using KartPlusPlus.Utility;
+
+using static SDL3.SDL;
 using OpenTK.Mathematics;
+using System.Diagnostics;
 
 namespace KartPlusPlus {
     public class KartPlusPlus {
@@ -42,7 +43,11 @@ namespace KartPlusPlus {
                 return SDL_AppResult.SDL_APP_FAILURE;
             }
             Input.Init();
+            PhysicsSim.Init();
             DefaultResources.Load();
+
+            SDL_SetWindowRelativeMouseMode(RenderPipeline.Window, true);
+            SDL_HideCursor();
 
             fixedStepTimer = new Stopwatch();
             fixedStepTimer.Start();
@@ -54,8 +59,11 @@ namespace KartPlusPlus {
 
             ResourceLoader.LoadResource(out Texture2D protoLight, "Textures/Prototype_Light.png");
             EngineObject kart = EngineObjectFactory.Instantiate("Kart");
+            kart.Transform.Position = Vector3.UnitY * 10;
+            kart.AddComponent<BoxCollider>("collider");
+            Rigidbody rb = kart.AddComponent<Rigidbody>("rigidbody");
+            //rb.UseGravity = false;
             kart.AddComponent<ModelRenderer>("model renderer").SetModel(CubeMesh.Generate(protoLight));
-            kart.Transform.Position = Vector3.UnitZ * 10;
 
             //EngineObject track = EngineObjectFactory.Instantiate("Track");
             //track.AddComponent<ModelRenderer>("model renderer").SetModel(trackModel);
@@ -83,7 +91,7 @@ namespace KartPlusPlus {
                     obj.components.ForEach(c => c.PhysicsTick());
                 }
 
-                //PhysicsSim.Tick();
+                PhysicsSim.Tick();
             }
 
             RenderPipeline.Render();
@@ -96,6 +104,7 @@ namespace KartPlusPlus {
         }
         private static void SDL_AppQuit(nint appState, SDL_AppResult result) {
             RenderPipeline.Dispose();
+            PhysicsSim.Dispose();
             SDL_Quit();
         }
     }

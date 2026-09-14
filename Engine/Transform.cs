@@ -3,12 +3,11 @@ using OpenTK.Mathematics;
 
 namespace KartPlusPlus.Engine {
     public class Transform : Component {
-        public Transform? Parent;
+        public Transform Parent;
         public List<Transform> Children;
 
         new public Transform ObjTransform;
 
-        //public EngineObject EngineObject;
         private bool isDirty = true;
         public event Action OnChanged;
 
@@ -29,24 +28,23 @@ namespace KartPlusPlus.Engine {
         public Matrix4 LocalMatrix {
             get {
                 if (isDirty) {
-                    localMatrix = Matrix4.CreateFromQuaternion(LocalRotation) * Matrix4.CreateTranslation(LocalPosition) * Matrix4.CreateScale(LocalScale);
+                    localMatrix = Matrix4.CreateScale(LocalScale) * Matrix4.CreateFromQuaternion(LocalRotation) * Matrix4.CreateTranslation(LocalPosition);
+                    isDirty = false;
                 }
 
                 return localMatrix;
             }
         }
-        private Matrix4 worldMatrix = Matrix4.Identity;
+        //private Matrix4 worldMatrix = Matrix4.Identity;
         public Matrix4 WorldMatrix {
             get {
-                if (isDirty) {
-                    worldMatrix = localMatrix;
+                //worldMatrix = localMatrix;
 
-                    if (Parent != null) {
-                        worldMatrix = localMatrix * Parent.WorldMatrix;
-                    }
-                }
+                //if (Parent != null) {
+                //    worldMatrix = localMatrix * Parent.WorldMatrix;
+                //}
 
-                return worldMatrix;
+                return Parent != null ? LocalMatrix * Parent.WorldMatrix : LocalMatrix;
             }
         }
 

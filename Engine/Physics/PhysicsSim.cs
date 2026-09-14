@@ -5,6 +5,7 @@ using BepuPhysics.Constraints;
 using BepuUtilities;
 using BepuUtilities.Memory;
 using KartPlusPlus.Engine;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace KartPlusPlus.Physics {
@@ -17,12 +18,17 @@ namespace KartPlusPlus.Physics {
         public static float SecondsPerTick = 1.0f / 50.0f;
         public static long MillisecondsPerTick => (long)(SecondsPerTick * 1000);
 
+        //body params
+        private static CollidableProperty<bool> bodyGravities;
+
         public static void Init() {
             threadDispatcher = new ThreadDispatcher(Environment.ProcessorCount);
             bufferPool = new BufferPool();
 
-            simulation = Simulation.Create(bufferPool, new NarrowPhaseCallbacks(),
-                new PoseIntegratorCallbacks(new System.Numerics.Vector3(0, -9.81f, 0)), new SolveDescription(8, 1));
+            bodyGravities = new CollidableProperty<bool>(bufferPool);
+
+            simulation = Simulation.Create(bufferPool, new NarrowPhaseCallbacks(), 
+                new PoseIntegratorCallbacks(new Vector3(0, -9.81f, 0), bodyGravities), new SolveDescription(8, 1));
         }
         public static void Tick() {
             if (Time.FixedDeltaTime <= 0) {
@@ -34,8 +40,11 @@ namespace KartPlusPlus.Physics {
             simulation.Dispose();
             threadDispatcher.Dispose();
             bufferPool.Clear();
+            bodyGravities.Dispose();
         }
-
+        public static void ChangeGravityState(BodyHandle bodyHandle, bool state) {
+            bodyGravities.Allocate(bodyHandle) = state;
+        }
         public struct NarrowPhaseCallbacks : INarrowPhaseCallbacks {
             public SpringSettings ContactSpringiness;
             public float MaximumRecoveryVelocity;
@@ -70,36 +79,57 @@ namespace KartPlusPlus.Physics {
             }
         }
         public struct PoseIntegratorCallbacks : IPoseIntegratorCallbacks {
-            public System.Numerics.Vector3 Gravity;
-            public float LinearDamping;
-            public float AngularDamping;
-
             public AngularIntegrationMode AngularIntegrationMode => AngularIntegrationMode.Nonconserving;
 
             public bool AllowSubstepsForUnconstrainedBodies => false;
 
             public bool IntegrateVelocityForKinematics => false;
 
-            Vector3Wide gravityWideDt;
-            System.Numerics.Vector<float> linearDampingDt;
-            System.Numerics.Vector<float> angularDampingDt;
+            private Bodies bodies;
 
-            public PoseIntegratorCallbacks(System.Numerics.Vector3 gravity, float linearDamping = 0.03f, float angularDamping = 0.03f) : this() {
+            //body params
+            public Vector3 Gravity;
+            public CollidableProperty<bool> BodyGravities;
+            public float LinearDamping;
+            public float AngularDamping;
+
+            //simd params
+            private Vector3Wide gravityWideDt;
+            private Vector<float> linearDampingDt;
+            private Vector<float> angularDampingDt;
+
+            public PoseIntegratorCallbacks(Vector3 gravity, CollidableProperty<bool> bodyGravities, 
+                float linearDamping = 0.03f, float angularDamping = 0.03f) : this() {
                 Gravity = gravity;
                 LinearDamping = linearDamping;
                 AngularDamping = angularDamping;
+                BodyGravities = bodyGravities;
             }
             public void Initialize(Simulation simulation) {
-
+                BodyGravities.Initialize(simulation);
+                bodies = simulation.Bodies;
             }
-            public void IntegrateVelocity(System.Numerics.Vector<int> bodyIndices, Vector3Wide position, QuaternionWide orientation, BodyInertiaWide localInertia, System.Numerics.Vector<int> integrationMask, int workerIndex, System.Numerics.Vector<float> dt, ref BodyVelocityWide velocity) {
+            public void IntegrateVelocity(Vector<int> bodyIndices, Vector3Wide position, 
+                QuaternionWide orientation, BodyInertiaWide localInertia, 
+                Vector<int> integrationMask, int workerIndex, 
+                Vector<float> dt, ref BodyVelocityWide velocity) {
+
+                Span<float> gravityValues = stackalloc float[Vector<float>.Count];
+                for (int i = 0; i < Vector<int>.Count; ++i) {
+                    int bodyIndex = bodyIndices[i];
+
+                    if (bodyIndex >= 0) {
+                        BodyHandle bodyHandle = bodies.ActiveSet.IndexToHandle[bodyIndex];
+                        gravityValues[i] = BodyGravities[bodyHandle] ? -9.81f : 0;
+                    }
+                }
                 //velocity.Linear = (velocity.Linear + gravityWideDt) * linearDampingDt;
                 //velocity.Angular = velocity.Angular * angularDampingDt;
-                velocity.Linear += gravityWideDt;
+                velocity.Linear.Y += new Vector<float>(gravityValues) * dt;
             }
             public void PrepareForIntegration(float dt) {
-                linearDampingDt = new System.Numerics.Vector<float>(MathF.Pow(MathHelper.Clamp(1 - LinearDamping, 0, 1), dt));
-                angularDampingDt = new System.Numerics.Vector<float>(MathF.Pow(MathHelper.Clamp(1 - AngularDamping, 0, 1), dt));
+                linearDampingDt = new Vector<float>(MathF.Pow(MathHelper.Clamp(1 - LinearDamping, 0, 1), dt));
+                angularDampingDt = new Vector<float>(MathF.Pow(MathHelper.Clamp(1 - AngularDamping, 0, 1), dt));
                 //TODO: cache gravity * dt
                 gravityWideDt = Vector3Wide.Broadcast(Gravity * dt);
             }
