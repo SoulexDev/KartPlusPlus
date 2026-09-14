@@ -52,21 +52,7 @@ namespace KartPlusPlus {
             fixedStepTimer = new Stopwatch();
             fixedStepTimer.Start();
 
-            EngineObject obj = EngineObjectFactory.Instantiate("Free Camera");
-            obj.AddComponent<FreeCam>("FreeCam");
-
-            ResourceLoader.LoadResource(out EngineObject trackModel, "Models/TestTrack.fbx");
-
-            ResourceLoader.LoadResource(out Texture2D protoLight, "Textures/Prototype_Light.png");
-            EngineObject kart = EngineObjectFactory.Instantiate("Kart");
-            kart.Transform.Position = Vector3.UnitY * 10;
-            kart.AddComponent<BoxCollider>("collider");
-            Rigidbody rb = kart.AddComponent<Rigidbody>("rigidbody");
-            //rb.UseGravity = false;
-            kart.AddComponent<ModelRenderer>("model renderer").SetModel(CubeMesh.Generate(protoLight));
-
-            //EngineObject track = EngineObjectFactory.Instantiate("Track");
-            //track.AddComponent<ModelRenderer>("model renderer").SetModel(trackModel);
+            TestTrack.Create();
 
             return SDL_AppResult.SDL_APP_CONTINUE;
         }

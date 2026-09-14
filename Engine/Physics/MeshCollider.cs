@@ -1,5 +1,6 @@
 ﻿using BepuPhysics;
-using KartPlusPlus.Renderer;
+using BepuPhysics.Collidables;
+using BepuUtilities.Memory;
 
 namespace KartPlusPlus.Physics {
     public class MeshCollider : Collider {
@@ -8,8 +9,10 @@ namespace KartPlusPlus.Physics {
         public override void Init() {
             base.Init();
         }
-        public void SetMesh(Mesh mesh) {
+        public void SetMesh(Renderer.Mesh mesh) {
             //VertexAttribute.GetTotalSizeInBytes(mesh.Attributes);
+            //Buffer<Triangle> triangles = new Buffer<Triangle>();
+
             collidable = new BepuPhysics.Collidables.Mesh();
         }
         internal override BodyInertia GetBodyIntertia(float mass) {
