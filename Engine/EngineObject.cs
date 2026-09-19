@@ -17,14 +17,14 @@
             Name = name;
             Transform = new Transform(this);
         }
-        public T AddComponent<T>(string name) where T : Component {
+        public T AddComponent<T>(string name = "") where T : Component {
             if (components.Exists(c => c.Name == name)) {
                 Console.Write($"Components with name {name} already exists.");
                 return null;
             }
             T component = (T)Activator.CreateInstance(typeof(T));
 
-            component.Name = name;
+            component.Name = name == string.Empty ? nameof(component) : name;
             component.EngineObject = this;
 
             components.Add(component);

@@ -12,7 +12,7 @@ uniform mat4 uView;
 uniform mat4 uProjection;
 
 void main(){
-	normal = aNorm;
+	normal = transpose(inverse(mat3(uModel))) * aNorm;
 	texCoords = aUv;
 	gl_Position = uProjection * uView * uModel * vec4(aPos, 1.0);
 }

@@ -101,8 +101,7 @@ namespace KartPlusPlus.AssetManagement {
             using (Stream stream = File.OpenRead(filePath)) {
                 Assimp.PostProcessSteps processFlags =
                     Assimp.PostProcessSteps.Triangulate |
-                    Assimp.PostProcessSteps.PreTransformVertices |
-                    Assimp.PostProcessSteps.MakeLeftHanded;
+                    Assimp.PostProcessSteps.PreTransformVertices;
 
                 Assimp.Scene scene = importer.ImportFileFromStream(stream, processFlags, fileType);
 

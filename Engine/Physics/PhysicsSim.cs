@@ -13,7 +13,7 @@ namespace KartPlusPlus.Physics {
         internal static Simulation simulation;
 
         private static ThreadDispatcher threadDispatcher;
-        private static BufferPool bufferPool;
+        public static BufferPool BufferPool;
 
         public static float SecondsPerTick = 1.0f / 50.0f;
         public static long MillisecondsPerTick => (long)(SecondsPerTick * 1000);
@@ -23,11 +23,11 @@ namespace KartPlusPlus.Physics {
 
         public static void Init() {
             threadDispatcher = new ThreadDispatcher(Environment.ProcessorCount);
-            bufferPool = new BufferPool();
+            BufferPool = new BufferPool();
 
-            bodyGravities = new CollidableProperty<bool>(bufferPool);
+            bodyGravities = new CollidableProperty<bool>(BufferPool);
 
-            simulation = Simulation.Create(bufferPool, new NarrowPhaseCallbacks(), 
+            simulation = Simulation.Create(BufferPool, new NarrowPhaseCallbacks(), 
                 new PoseIntegratorCallbacks(new Vector3(0, -9.81f, 0), bodyGravities), new SolveDescription(8, 1));
         }
         public static void Tick() {
@@ -39,7 +39,7 @@ namespace KartPlusPlus.Physics {
         public static void Dispose() {
             simulation.Dispose();
             threadDispatcher.Dispose();
-            bufferPool.Clear();
+            BufferPool.Clear();
             bodyGravities.Dispose();
         }
         public static void ChangeGravityState(BodyHandle bodyHandle, bool state) {

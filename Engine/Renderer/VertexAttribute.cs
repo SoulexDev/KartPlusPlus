@@ -14,6 +14,8 @@ namespace KartPlusPlus.Renderer {
         public static VertexAttribute Vector2 = new VertexAttribute(VertexAttribPointerType.Float, sizeof(float) * 2, 2);
         public static VertexAttribute Vector3 = new VertexAttribute(VertexAttribPointerType.Float, sizeof(float) * 3, 3);
         public static VertexAttribute Vector4 = new VertexAttribute(VertexAttribPointerType.Float, sizeof(float) * 4, 4);
+        //position, normal, color, uv1, uv2
+        public static VertexAttribute[] Standard = { Vector3, Vector3, Vector3, Vector2, Vector2 };
 
         public static Dictionary<VertexAttributeType, VertexAttribute> attributeDict = new Dictionary<VertexAttributeType, VertexAttribute>
         {

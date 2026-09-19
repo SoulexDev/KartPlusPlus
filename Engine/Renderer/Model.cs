@@ -1,5 +1,4 @@
-﻿using Assimp;
-using KartPlusPlus.Physics;
+﻿using KartPlusPlus.Physics;
 
 namespace KartPlusPlus.Renderer {
     public class Model {

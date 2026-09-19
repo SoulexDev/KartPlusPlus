@@ -12,13 +12,7 @@ namespace KartPlusPlus.Physics {
         protected bool isStatic;
 
         public override void Init() {
-            if (!EngineObject.HasComponentOfType<Rigidbody>()) {
-                RigidPose pose = new RigidPose((System.Numerics.Vector3)ObjTransform.Position, (System.Numerics.Quaternion)ObjTransform.Rotation);
-                StaticDescription staticDescription = new StaticDescription(pose, collidableIndex);
-                staticHandle = PhysicsSim.simulation.Statics.Add(staticDescription);
-
-                isStatic = true;
-            }
+            TryCreateStaticCollider();
 
             ObjTransform.OnChanged += OnTransformChanged;
         }
@@ -40,6 +34,15 @@ namespace KartPlusPlus.Physics {
         }
         public override void OnDestroy() {
             ObjTransform.OnChanged -= OnTransformChanged;
+        }
+        protected void TryCreateStaticCollider() {
+            if (!EngineObject.HasComponentOfType<Rigidbody>()) {
+                RigidPose pose = new RigidPose((System.Numerics.Vector3)ObjTransform.Position, (System.Numerics.Quaternion)ObjTransform.Rotation);
+                StaticDescription staticDescription = new StaticDescription(pose, collidableIndex);
+                staticHandle = PhysicsSim.simulation.Statics.Add(staticDescription);
+
+                isStatic = true;
+            }
         }
         private void OnTransformChanged() {
             if (isStatic) {
