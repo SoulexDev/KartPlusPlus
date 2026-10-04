@@ -11,6 +11,8 @@ namespace KartPlusPlus.Game {
             //EngineObject obj = EngineObjectFactory.Instantiate("Free Camera");
             //obj.AddComponent<FreeCam>("FreeCam");
 
+            PhysicsSim.AddLayer("player");
+
             ResourceLoader.LoadResource(out Model trackModel, "Models/TestTrack.fbx");
             ResourceLoader.LoadResource(out Texture2D protoLight, "Textures/Prototype_Light.png");
 
@@ -18,11 +20,17 @@ namespace KartPlusPlus.Game {
             track.AddComponent<ModelRenderer>().SetModel(trackModel);
             track.AddComponent<MeshCollider>().SetMesh(trackModel.Meshes[0].Item1);
 
+            //EngineObject floor = EngineObjectFactory.Instantiate("floor");
+            //floor.AddComponent<ModelRenderer>().SetModel(CubeMesh.Generate(protoLight));
+            //floor.Transform.LocalScale = new Vector3(10, 0.25f, 10);
+            //floor.AddComponent<BoxCollider>();
+
             Model cubeModel = CubeMesh.Generate(protoLight);
 
             EngineObject kart = EngineObjectFactory.Instantiate("kart");
             kart.AddComponent<ModelRenderer>().SetModel(cubeModel);
             kart.AddComponent<KartController>();
+            kart.Transform.LocalScale = new Vector3(1.5f, 1, 2);
 
             //EngineObject freeCam = EngineObjectFactory.Instantiate("freecam");
             //freeCam.AddComponent<FreeCam>();

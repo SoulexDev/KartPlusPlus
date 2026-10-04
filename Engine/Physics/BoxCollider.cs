@@ -1,6 +1,5 @@
 ﻿using BepuPhysics;
 using BepuPhysics.Collidables;
-using KartPlusPlus.Physics;
 
 namespace KartPlusPlus.Physics {
     public class BoxCollider : Collider {
@@ -22,7 +21,7 @@ namespace KartPlusPlus.Physics {
             //TODO: make fit object bounding box
             collidable = new Box(ObjTransform.LocalScale.X, ObjTransform.LocalScale.Y, ObjTransform.LocalScale.Z);
             collidableIndex = PhysicsSim.simulation.Shapes.Add(collidable);
-
+            
             //always call base after in this scenario
             base.Init();
         }

@@ -11,16 +11,27 @@ namespace KartPlusPlus.Physics {
 
         protected bool isStatic;
 
+        private bool hasRigidbody;
+
         public override void Init() {
             TryCreateStaticCollider();
 
             ObjTransform.OnChanged += OnTransformChanged;
+            EngineObject.physicsLayerChanged += OnPhysicsLayerChanged;
+
+            OnPhysicsLayerChanged(EngineObject.PhysicsLayer);
+        }
+        private void OnPhysicsLayerChanged(int layer) {
+            if (!hasRigidbody) {
+                PhysicsSim.ChangePhysicsLayer(staticHandle, layer);
+            }
         }
         public override void OnComponentAdded(Component component) {
             if (component is Rigidbody) {
                 PhysicsSim.simulation.Statics.Remove(staticHandle);
 
                 isStatic = false;
+                hasRigidbody = true;
             }
         }
         public override void OnComponentRemoved(Component component) {
@@ -30,10 +41,12 @@ namespace KartPlusPlus.Physics {
                 staticHandle = PhysicsSim.simulation.Statics.Add(staticDescription);
 
                 isStatic = true;
+                hasRigidbody = false;
             }
         }
         public override void OnDestroy() {
             ObjTransform.OnChanged -= OnTransformChanged;
+            EngineObject.physicsLayerChanged -= OnPhysicsLayerChanged;
         }
         protected void TryCreateStaticCollider() {
             if (!EngineObject.HasComponentOfType<Rigidbody>()) {
@@ -52,7 +65,7 @@ namespace KartPlusPlus.Physics {
             }
         }
         internal virtual BodyInertia GetBodyIntertia(float mass) {
-            return default(BodyInertia);
+            return default;
         }
     }
 }

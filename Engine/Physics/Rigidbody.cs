@@ -11,18 +11,18 @@ namespace KartPlusPlus.Physics {
 
         public Vector3 LinearVelocity {
             get {
-                return (Vector3)PhysicsSim.simulation.Bodies[bodyID].Velocity.Linear;
+                return (Vector3)bodyReference.Velocity.Linear;
             }
             set {
-                PhysicsSim.simulation.Bodies[bodyID].Velocity.Linear = (System.Numerics.Vector3)value;
+                bodyReference.Velocity.Linear = (System.Numerics.Vector3)value;
             }
         }
         public Vector3 AngularVelocity {
             get {
-                return (Vector3)PhysicsSim.simulation.Bodies[bodyID].Velocity.Angular;
+                return (Vector3)bodyReference.Velocity.Angular;
             }
             set {
-                PhysicsSim.simulation.Bodies[bodyID].Velocity.Angular = (System.Numerics.Vector3)value;
+                bodyReference.Velocity.Angular = (System.Numerics.Vector3)value;
             }
         }
 
@@ -32,10 +32,10 @@ namespace KartPlusPlus.Physics {
             set {
                 _kinematic = value;
                 if (_kinematic) {
-                    PhysicsSim.simulation.Bodies[bodyID].BecomeKinematic();
+                    bodyReference.BecomeKinematic();
                 }
                 else
-                    PhysicsSim.simulation.Bodies[bodyID].SetLocalInertia(bodyIntertia);
+                    bodyReference.SetLocalInertia(bodyIntertia);
             }
         }
         public float Mass = 1;
@@ -120,6 +120,9 @@ namespace KartPlusPlus.Physics {
         private Vector3 nextSimPos;
         private Quaternion nextSimRot;
         public override void Init() {
+            EngineObject.physicsLayerChanged += OnPhysicsLayerChanged;
+            OnPhysicsLayerChanged(EngineObject.PhysicsLayer);
+
             List<Component> colliders = EngineObject.GetComponentsOfType<Collider>();
 
             BodyDescription bodyDescription;
@@ -152,6 +155,9 @@ namespace KartPlusPlus.Physics {
         public override void OnComponentAdded(Component component) {
 
         }
+        private void OnPhysicsLayerChanged(int layer) {
+            PhysicsSim.ChangePhysicsLayer(bodyID, layer);
+        }
         public override void PhysicsTick() {
             lastSimPos = nextSimPos;
             lastSimRot = nextSimRot;
@@ -163,6 +169,9 @@ namespace KartPlusPlus.Physics {
             float frameLerp = MathHelper.Clamp((Time.NextFixedFrameTime - Time.ElapsedTime) / PhysicsSim.SecondsPerTick, 0f, 1f);
             ObjTransform.Position = Vector3.Lerp(lastSimPos, nextSimPos, frameLerp);
             ObjTransform.Rotation = nextSimRot;
+        }
+        public override void OnDestroy() {
+            EngineObject.physicsLayerChanged -= OnPhysicsLayerChanged;
         }
         public void AddForce(Vector3 force) {
             bodyReference.Velocity.Linear += (System.Numerics.Vector3)force;

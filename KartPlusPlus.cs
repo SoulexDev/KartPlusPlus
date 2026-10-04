@@ -47,7 +47,7 @@ namespace KartPlusPlus {
             DefaultResources.Load();
 
             SDL_SetWindowRelativeMouseMode(RenderPipeline.Window, true);
-            SDL_HideCursor();
+            //SDL_HideCursor();
 
             fixedStepTimer = new Stopwatch();
             fixedStepTimer.Start();

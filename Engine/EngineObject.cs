@@ -7,13 +7,26 @@
 
         internal event Action<Component> componentAdded;
         internal event Action<Component> componentRemoved;
+        internal event Action<int> physicsLayerChanged;
+
+        private int physicsLayer = 0;
+        public int PhysicsLayer {
+            get { return physicsLayer; }
+            set {
+                if (physicsLayer != value) {
+                    physicsLayer = value;
+
+                    physicsLayerChanged?.Invoke(physicsLayer);
+                }
+            }
+        }
+        public int LightLayer;
 
         internal EngineObject() {
             Name = "Engine Object";
             Transform = new Transform(this);
         }
         internal EngineObject(string name) {
-
             Name = name;
             Transform = new Transform(this);
         }
